@@ -1,0 +1,1521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#121212">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Follower Extractor</title>
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            /* Light Mode Colors */
+            --bg-body: #F8FAFC;
+            --bg-container: #FFFFFF;
+            --text-primary: #475569;
+            --text-secondary: #64748B;
+            --text-heading: #3B82F6;
+            --text-username: #1D4ED8;
+            --border-light: #E2E8F0;
+            --border-medium: #CBD5E1;
+            --bg-input-group: #F0F4F8;
+            --bg-output: #EBF2F7;
+            --bg-user-entry: #FDFEFE;
+            --bg-user-entry-hover: #F0F4F8;
+            --shadow-soft: rgba(0,0,0,0.08);
+            --shadow-blue: rgba(59, 130, 246, 0.2);
+            --shadow-green: rgba(34, 197, 94, 0.3);
+            --shadow-red: rgba(239, 68, 68, 0.2);
+            --button-primary: #3B82F6;
+            --button-primary-hover: #2563EB;
+            --button-copy: #22C55E;
+            --button-copy-hover: #16A34A;
+            --button-filter-danger: #EF4444;
+            --button-filter-danger-hover: #DC2626;
+            --button-cancel: #64748B;
+            --button-cancel-hover: #475569;
+            --search-border: #CBD5E1;
+            --search-shadow-focus: rgba(59, 130, 246, 0.2);
+        }
+
+        [data-theme='dark'] {
+            /* Dark Mode Colors - Adjusted for darker background */
+            --bg-body: #121212; /* Very dark, almost black */
+            --bg-container: #1E1E1E; /* Slightly lighter dark gray for contrast */
+            --text-primary: #E0E0E0; /* Lighter gray for readability */
+            --text-secondary: #B0B0B0; /* Muted light gray */
+            --text-heading: #63B3ED; /* Lighter blue */
+            --text-username: #90CDF4; /* Even lighter blue */
+            --border-light: #333333; /* Darker border */
+            --border-medium: #444444; /* Slightly lighter dark border */
+            --bg-input-group: #282828; /* Darker input group background */
+            --bg-output: #282828; /* Darker output background */
+            --bg-user-entry: #3A3A3A; /* Darker user entry background */
+            --bg-user-entry-hover: #4A4A4A; /* Darker hover state */
+            --shadow-soft: rgba(0,0,0,0.5); /* More prominent shadow in dark mode */
+            --shadow-blue: rgba(99, 179, 237, 0.2);
+            --shadow-green: rgba(34, 197, 94, 0.4);
+            --shadow-red: rgba(239, 68, 68, 0.3);
+            --button-primary: #63B3ED;
+            --button-primary-hover: #4299E1;
+            --button-copy: #48BB78;
+            --button-copy-hover: #38A169;
+            --button-filter-danger: #FC8181;
+            --button-filter-danger-hover: #E53E3E;
+            --button-cancel: #A0AEC0;
+            --button-cancel-hover: #CBD5E1;
+            --search-border: #4A4A4A;
+            --search-shadow-focus: rgba(99, 179, 237, 0.3);
+        }
+
+        /* General Body and Container Styling */
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--bg-container);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px var(--shadow-soft);
+            border: 1px solid var(--border-light);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        h1 {
+            text-align: center;
+            color: var(--text-heading);
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        /* Dark Mode Toggle Switch */
+        .theme-switch-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end; /* Align to the right */
+            margin-bottom: 20px;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+        .theme-switch {
+            display: inline-block;
+            height: 24px;
+            position: relative;
+            width: 48px;
+        }
+        .theme-switch input {
+            display: none;
+        }
+        .slider {
+            background-color: var(--button-cancel); /* Gray for off state */
+            bottom: 0;
+            cursor: pointer;
+            left: 0;
+            right: 0;
+            top: 0;
+            position: absolute;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            background-color: #fff;
+            bottom: 2px;
+            content: "";
+            height: 20px;
+            left: 2px;
+            position: absolute;
+            transition: .4s;
+            width: 20px;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--button-primary); /* Blue for on state */
+        }
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+        .theme-switch-wrapper label {
+            margin-bottom: 0; /* Override default label margin */
+            font-weight: normal;
+        }
+
+
+        /* File Input Group Styling */
+        .file-input-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            background-color: var(--bg-input-group);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .file-input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        .file-input-group input[type="file"] {
+            display: none;
+        }
+        .custom-file-button {
+            background-color: var(--button-primary);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 8px var(--shadow-blue);
+            margin-bottom: 8px;
+        }
+        .custom-file-button:hover {
+            background-color: var(--button-primary-hover);
+            transform: translateY(-2px);
+        }
+        .custom-file-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px var(--shadow-blue);
+        }
+        .file-name-display {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            padding-left: 5px;
+            transition: color 0.3s ease;
+        }
+
+        /* Main Button Group Styling */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        button {
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            flex-shrink: 0;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+
+        #extractButton, #filterButton {
+            background-color: var(--button-primary);
+            box-shadow: 0 4px 8px var(--shadow-blue);
+            padding: 10px 15px;
+            font-size: 0.95em;
+            min-width: 120px;
+        }
+        #extractButton:hover, #filterButton:hover {
+            background-color: var(--button-primary-hover);
+        }
+        #extractButton:active, #filterButton:active {
+            box-shadow: 0 2px 4px var(--shadow-blue);
+        }
+
+        /* Combine & Copy Button Styling */
+        #combineCopyButton {
+            background-color: var(--button-copy);
+            display: none;
+            position: relative;
+            overflow: hidden;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            padding: 0;
+            font-size: 2em;
+            line-height: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px var(--shadow-green);
+            flex-shrink: 0;
+        }
+        #combineCopyButton span {
+            display: block;
+            transition: transform 0.3s ease-out;
+        }
+        #combineCopyButton:hover {
+            background-color: var(--button-copy-hover);
+            transform: scale(1.05);
+        }
+        #combineCopyButton:active {
+            box-shadow: 0 2px 4px var(--shadow-green);
+        }
+
+        /* Output Area Styling */
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--bg-output);
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            overflow-y: auto;
+            max-height: 500px;
+            min-height: 100px;
+            color: var(--text-primary);
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        #output.empty-message {
+            text-align: center;
+            color: var(--text-secondary);
+            font-style: italic;
+            padding: 30px;
+            transition: color 0.3s ease;
+        }
+
+        /* Counts Display & Search Bar Group */
+        .info-and-search-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .count-display {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: color 0.3s ease;
+        }
+        .count-display span {
+            color: var(--text-heading);
+            font-weight: 700;
+            transition: color 0.3s ease;
+        }
+
+        /* Search Bar Styling */
+        .search-bar-container {
+            display: flex;
+            flex-grow: 1;
+            max-width: 300px;
+            min-width: 180px;
+            box-shadow: 0 2px 5px var(--shadow-soft);
+            border-radius: 25px;
+            overflow: hidden;
+            background-color: var(--bg-container);
+            border: 1px solid var(--search-border);
+            transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .search-bar-container:focus-within {
+            box-shadow: 0 1px 6px var(--search-shadow-focus);
+            border-color: transparent;
+        }
+        #searchInput {
+            flex-grow: 1;
+            padding: 10px 15px;
+            border: none;
+            outline: none;
+            font-size: 0.95em;
+            font-family: 'Inter', sans-serif;
+            background: transparent;
+            resize: none;
+            overflow-y: hidden;
+            min-height: 40px;
+            max-height: 100px;
+            color: var(--text-primary);
+            transition: color 0.3s ease;
+        }
+        #searchButton {
+            background-color: transparent;
+            color: var(--button-primary);
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: color 0.2s ease, background-color 0.2s ease;
+            box-shadow: none;
+            border-radius: 0 25px 25px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #searchButton:hover {
+            color: var(--button-primary-hover);
+            background-color: var(--bg-input-group);
+            transform: none;
+        }
+        #searchButton:active {
+            background-color: var(--border-light);
+        }
+        #searchButton svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Custom Message Box Styling */
+        .message-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .message-content {
+            background-color: var(--bg-container);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px var(--shadow-soft);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform 0.2s ease-out, background-color 0.3s ease, color 0.3s ease;
+            color: var(--text-primary);
+        }
+        .message-box:not(.hidden) .message-content {
+            transform: scale(1);
+        }
+        .message-content button {
+            margin-top: 20px;
+            background-color: var(--button-primary);
+            padding: 10px 25px;
+            font-size: 1em;
+            box-shadow: none;
+        }
+        .message-content button:hover {
+            background-color: var(--button-primary-hover);
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* User Entry (Swipeable) Styling */
+        .user-entry {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            background-color: var(--bg-user-entry);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: background-color 0.2s, border-color 0.2s, transform 0.1s ease-in-out, opacity 0.3s ease-out;
+            position: relative;
+            z-index: 1;
+            touch-action: pan-y;
+        }
+        .user-entry:hover {
+            background-color: var(--bg-user-entry-hover);
+            border-color: var(--border-medium);
+            transform: translateX(3px);
+            cursor: grab;
+        }
+        .user-entry.dragging {
+            cursor: grabbing;
+            transition: none;
+        }
+        .user-entry.removing {
+            transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+        }
+        .user-entry .profile-pic {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            margin-right: 12px;
+            object-fit: cover;
+            border: 2px solid var(--border-light);
+            flex-shrink: 0;
+            transition: border-color 0.3s ease;
+        }
+        .user-entry .text-content {
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .user-entry .username {
+            font-weight: bold;
+            color: var(--text-username);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+        }
+        .user-entry .display-name {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+        }
+
+        /* Modal Styles (Filter and Not Found) */
+        #filterModal, #notFoundModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            backdrop-filter: blur(5px);
+        }
+        .filter-modal-content, .not-found-modal-content {
+            background-color: var(--bg-container);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px var(--shadow-soft);
+            max-width: 600px;
+            width: 90%;
+            transform: scale(0.95);
+            transition: transform 0.2s ease-out, background-color 0.3s ease, color 0.3s ease;
+            color: var(--text-primary);
+        }
+        #filterModal:not(.hidden) .filter-modal-content,
+        #notFoundModal:not(.hidden) .not-found-modal-content {
+            transform: scale(1);
+        }
+        .filter-modal-content h3, .not-found-modal-content h3 {
+            text-align: center;
+            color: var(--text-heading);
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            transition: color 0.3s ease;
+        }
+        .filter-modal-content textarea, .not-found-modal-content textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95em;
+            resize: vertical;
+            box-sizing: border-box;
+            color: var(--text-primary);
+            background-color: var(--bg-output); /* Use output background for textareas */
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+        }
+        .filter-modal-content .file-input-group, .not-found-modal-content .file-input-group {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            padding: 10px;
+            background-color: var(--bg-input-group);
+            border-color: var(--border-medium);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .filter-modal-content .modal-buttons, .not-found-modal-content .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .filter-modal-content .modal-buttons button, .not-found-modal-content .modal-buttons button {
+            padding: 10px 20px;
+            font-size: 1em;
+            box-shadow: none;
+        }
+        .filter-modal-content .modal-buttons button.cancel, .not-found-modal-content .modal-buttons button.cancel {
+            background-color: var(--button-cancel);
+        }
+        .filter-modal-content .modal-buttons button.cancel:hover, .not-found-modal-content .modal-buttons button.cancel:hover {
+            background-color: var(--button-cancel-hover);
+        }
+        .filter-modal-content .modal-buttons button.apply-filter {
+            background-color: var(--button-filter-danger);
+        }
+        .filter-modal-content .modal-buttons button.apply-filter:hover {
+            background-color: var(--button-filter-danger-hover);
+        }
+        .not-found-modal-content .modal-buttons button.copy-not-found {
+            background-color: var(--button-copy);
+        }
+        .not-found-modal-content .modal-buttons button.copy-not-found:hover {
+            background-color: var(--button-copy-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="theme-switch-wrapper">
+            <label for="darkModeToggle">Dark Mode</label>
+            <label class="theme-switch" for="darkModeToggle">
+                <input type="checkbox" id="darkModeToggle">
+                <div class="slider round"></div>
+            </label>
+        </div>
+
+        <h1>Instagram Follower Extractor</h1>
+        <p>Upload HTML files.</p>
+
+        <div class="file-input-group">
+            <label for="htmlFile1">Primary HTML:</label>
+            <input type="file" id="htmlFile1" accept=".html,.htm">
+            <button class="custom-file-button" onclick="document.getElementById('htmlFile1').click()">Select Primary File</button>
+            <div id="file1Name" class="file-name-display">No file selected</div>
+        </div>
+
+        <div class="file-input-group">
+            <label for="htmlFile2">Optional HTML:</label>
+            <input type="file" id="htmlFile2" accept=".html,.htm">
+            <button class="custom-file-button" onclick="document.getElementById('htmlFile2').click()">Select Optional File</button>
+            <div id="file2Name" class="file-name-display">No file selected</div>
+        </div>
+        
+        <div class="button-group">
+            <button id="extractButton" onclick="extractFollowers()">Extract</button>
+            <button id="combineCopyButton" onclick="combineAndCopy()"><span>+</span></button>
+            <button id="filterButton" onclick="showFilterModal()">Filter</button>
+        </div>
+
+        <h2>Extracted List:</h2>
+        <div class="info-and-search-group">
+            <div id="extractedCountDisplay" class="count-display">Total: <span>0</span></div>
+            <div class="search-bar-container">
+                <textarea id="searchInput" placeholder="Search" rows="1" oninput="autoExpandTextarea(this)"></textarea>
+                <button id="searchButton" onclick="performSearch()">
+                    <svg viewBox="0 0 24 24" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div id="output" class="empty-message">
+            Upload files and click 'Extract' to see results.
+        </div>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox" class="message-box hidden">
+        <div class="message-content">
+            <p id="messageText"></p>
+            <button onclick="hideMessageBox()">OK</button>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filterModal" class="message-box hidden">
+        <div class="filter-modal-content">
+            <h3>Filter List</h3>
+            <p>Enter names or upload file.</p>
+            <textarea id="filterInput" placeholder="Names or usernames, one per line" rows="1" oninput="autoExpandTextarea(this)"></textarea>
+            <div class="count-display">Terms to Filter: <span id="filterTermCount">0</span></div>
+            <div class="file-input-group">
+                <label for="filterFile">Filter File (.txt):</label>
+                <input type="file" id="filterFile" accept=".txt">
+                <button class="custom-file-button" onclick="document.getElementById('filterFile').click()">Select Filter File</button>
+                <div id="filterFileName" class="file-name-display">No file selected</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="cancel" onclick="hideFilterModal()">Cancel</button>
+                <button class="apply-filter" onclick="applyFilter()">Apply Filter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Not Found Terms Modal -->
+    <div id="notFoundModal" class="message-box hidden">
+        <div class="not-found-modal-content">
+            <h3>Terms Not Found</h3>
+            <p>These terms were not found:</p>
+            <textarea id="notFoundTermsOutput" readonly></textarea>
+            <div class="modal-buttons">
+                <button class="copy-not-found" onclick="copyNotFoundTerms()">Copy List</button>
+                <button class="cancel" onclick="hideNotFoundModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let globalExtractedUsers = [];
+        let globalNotFoundTerms = [];
+
+        // --- Dark Mode Logic ---
+        const darkModeToggle = document.getElementById('darkModeToggle');
+
+        /**
+         * Applies the saved theme preference or defaults to light mode.
+         */
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                darkModeToggle.checked = true;
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                darkModeToggle.checked = false;
+            }
+        }
+
+        /**
+         * Toggles the theme between light and dark.
+         */
+        function toggleTheme() {
+            if (document.documentElement.getAttribute('data-theme') === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // --- Utility Functions ---
+
+        /**
+         * Automatically expands a textarea vertically as content is typed.
+         * @param {HTMLTextAreaElement} element - The textarea element to expand.
+         */
+        function autoExpandTextarea(element) {
+            element.style.height = 'auto';
+            element.style.height = (element.scrollHeight) + 'px';
+        }
+
+        /**
+         * Displays a custom message box.
+         * @param {string} message - The message to display.
+         */
+        function showMessageBox(message) {
+            document.getElementById('messageText').textContent = message;
+            document.getElementById('messageBox').classList.remove('hidden');
+        }
+
+        /**
+         * Hides the custom message box.
+         */
+        function hideMessageBox() {
+            document.getElementById('messageBox').classList.add('hidden');
+        }
+
+        /**
+         * Helper function to read a File object as text.
+         * @param {File} file - The File object to read.
+         * @returns {Promise<string>} A promise that resolves with the file's content as a string.
+         */
+        function readFileAsText(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = (e) => reject(e);
+                reader.readAsText(file);
+            });
+        }
+
+        // --- File Input & Display Functions ---
+
+        /**
+         * Updates the display for a selected file's name.
+         * @param {string} inputId - The ID of the file input element.
+         * @param {string} displayId - The ID of the div to display the file name.
+         */
+        function updateFileNameDisplay(inputId, displayId) {
+            const fileInput = document.getElementById(inputId);
+            const fileNameDisplay = document.getElementById(displayId);
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = fileInput.files[0].name;
+            } else {
+                fileNameDisplay.textContent = 'No file selected';
+            }
+        }
+
+        // --- Modals Functions ---
+
+        /**
+         * Shows the filter modal and updates the filter term count.
+         */
+        function showFilterModal() {
+            document.getElementById('filterModal').classList.remove('hidden');
+            document.getElementById('filterInput').value = ''; // Clear previous input
+            document.getElementById('filterFile').value = ''; // Clear previous file
+            updateFileNameDisplay('filterFile', 'filterFileName'); // Reset filter file name display
+            updateFilterTermCount(); // Update count when modal opens
+            autoExpandTextarea(document.getElementById('filterInput')); // Reset textarea height
+        }
+
+        /**
+         * Hides the filter modal.
+         */
+        function hideFilterModal() {
+            document.getElementById('filterModal').classList.add('hidden');
+        }
+
+        /**
+         * Shows the "Not Found Terms" modal.
+         * @param {Array<string>} terms - An array of terms to display.
+         */
+        function showNotFoundModal(terms) {
+            const notFoundTermsOutput = document.getElementById('notFoundTermsOutput');
+            notFoundTermsOutput.value = terms.join('\n');
+            document.getElementById('notFoundModal').classList.remove('hidden');
+            autoExpandTextarea(notFoundTermsOutput); // Adjust textarea height
+        }
+
+        /**
+         * Hides the "Not Found Terms" modal.
+         */
+        function hideNotFoundModal() {
+            document.getElementById('notFoundModal').classList.add('hidden');
+        }
+
+        // --- Extractor Core Logic ---
+
+        /**
+         * Attempts to find a distinct display name within an element's context.
+         * This function is designed to be highly robust, looking for the full name
+         * while carefully avoiding the username itself or generic UI text.
+         * @param {HTMLElement} contextElement - The element (e.g., a user row, a link) to search within.
+         * @param {string} username - The known username to help differentiate.
+         * @returns {string} The found display name, or the username as a fallback.
+         */
+        function getDisplayName(contextElement, username) {
+            let foundName = '';
+            const lowerCaseUsername = username.toLowerCase();
+
+            // Helper to check if text is a valid name candidate
+            const isValidNameCandidate = (text) => {
+                if (!text || text.length < 2) {
+                    return false;
+                }
+                const lowerText = text.toLowerCase();
+                if (lowerText === lowerCaseUsername || lowerText === `@${lowerCaseUsername}`) {
+                    return false;
+                }
+                const commonUIPatterns = [
+                    'followers', 'following', 'follow back', 'follow', 'requested', 'message',
+                    'view profile', 'suggested for you', 'explore', 'stories', 'reels', 'accounts',
+                    'login', 'emails', 'challenge', 'legal', 'about', 'privacy', 'help', 'terms',
+                    'unfollow', 'remove', 'edit profile', 'options', 'post', 'posts', 'likes', 'comments',
+                    'activity', 'notifications', 'search', 'home', 'profile', 'verified'
+                ];
+                if (commonUIPatterns.some(pattern => lowerText.includes(pattern))) {
+                    return false;
+                }
+                if (/^\d+$/.test(text)) {
+                    return false;
+                }
+                if (text.startsWith('@') && text.length < 3) {
+                    return false;
+                }
+                return true;
+            };
+
+            // Strategy 1: Look for specific sibling spans with dir="auto"
+            const linkWrapperDiv = contextElement.querySelector('a')?.parentElement;
+            if (linkWrapperDiv && linkWrapperDiv.parentElement) {
+                const siblingsOfLinkWrapper = Array.from(linkWrapperDiv.parentElement.children);
+                for (const sibling of siblingsOfLinkWrapper) {
+                    if (sibling.tagName === 'SPAN' && sibling !== linkWrapperDiv && sibling.hasAttribute('dir') && sibling.getAttribute('dir') === 'auto') {
+                        const nestedSpan = sibling.querySelector('span');
+                        const text = (nestedSpan || sibling).textContent?.trim();
+                        if (isValidNameCandidate(text)) {
+                            return text;
+                        }
+                    }
+                }
+            }
+
+            // Strategy 2: Check aria-label and title attributes
+            const checkAttributes = (el) => {
+                if (el) {
+                    if (el.hasAttribute('aria-label')) {
+                        const ariaLabel = el.getAttribute('aria-label');
+                        if (isValidNameCandidate(ariaLabel)) {
+                            if (!ariaLabel.toLowerCase().includes(`${lowerCaseUsername}'s profile picture`)) {
+                                return ariaLabel;
+                            }
+                        }
+                    }
+                    if (el.hasAttribute('title')) {
+                        const title = el.getAttribute('title');
+                        if (isValidNameCandidate(title)) {
+                            return title;
+                        }
+                    }
+                }
+                return null;
+            };
+
+            let attrName = checkAttributes(contextElement);
+            if (attrName) {
+                return attrName;
+            }
+
+            const directChildren = contextElement.children;
+            for (const child of directChildren) {
+                attrName = checkAttributes(child);
+                if (attrName) {
+                    return attrName;
+                }
+                if (child.tagName === 'IMG' && child.alt) {
+                    const altText = child.alt.trim();
+                    if (isValidNameCandidate(altText)) {
+                        if (!altText.toLowerCase().includes(`${lowerCaseUsername}'s profile picture`)) {
+                            return altText;
+                        }
+                    }
+                }
+            }
+
+            const nestedElements = contextElement.querySelectorAll('a, div, span');
+            for (const nestedEl of nestedElements) {
+                attrName = checkAttributes(nestedEl);
+                if (attrName) {
+                    return attrName;
+                }
+            }
+
+            // Strategy 3: Broader text content search within the container
+            const allTextElements = contextElement.querySelectorAll('span, div, h1, h2, h3, p');
+            for (const el of allTextElements) {
+                const text = el.textContent?.trim();
+                if (isValidNameCandidate(text)) {
+                    if (!foundName) {
+                        foundName = text;
+                    }
+                }
+            }
+
+            return foundName || username;
+        }
+
+        /**
+         * Processes a single HTML content string to extract user data and update a map.
+         * @param {string} htmlContent - The HTML content to parse.
+         * @param {Map<string, object>} usersMap - The map to store/update user data.
+         * @param {boolean} isSecondaryFile - True if this is the optional second file, for merging logic.
+         */
+        function processHtmlContent(htmlContent, usersMap, isSecondaryFile = false) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlContent, 'text/html');
+
+            // Strategy 1: Find all links that look like profile links
+            const profileLinks = doc.querySelectorAll('a[href^="/"], a[href*="instagram.com/"]');
+
+            profileLinks.forEach(link => {
+                let username = '';
+                let displayName = '';
+                let profilePicUrl = '';
+
+                const href = link.getAttribute('href');
+                const usernameMatch = href.match(/(?:instagram\.com\/|\/)([a-zA-Z0-9._-]+)(?:\/)?$/);
+                if (usernameMatch && usernameMatch[1] && !['p', 'explore', 'direct', 'stories', 'reels', 'accounts', 'login', 'emails', 'challenge', 'legal', 'about', 'privacy', 'help', 'terms'].includes(usernameMatch[1].toLowerCase())) {
+                    username = usernameMatch[1];
+                }
+
+                if (username) {
+                    displayName = getDisplayName(link.parentElement, username);
+                    const img = link.querySelector('img') || link.parentElement?.querySelector('img');
+                    if (img && img.src) {
+                        profilePicUrl = img.src;
+                    }
+
+                    const lowerCaseUsername = username.toLowerCase();
+                    if (usersMap.has(lowerCaseUsername)) {
+                        const existingUser = usersMap.get(lowerCaseUsername);
+
+                        const existingDisplayNameIsUsername = existingUser.displayName.toLowerCase() === existingUser.username.toLowerCase();
+                        const newDisplayNameIsDistinct = displayName.toLowerCase() !== username.toLowerCase();
+
+                        if (newDisplayNameIsDistinct && existingDisplayNameIsUsername) {
+                            existingUser.displayName = displayName;
+                        } else if (newDisplayNameIsDistinct && displayName.length > existingUser.displayName.length) {
+                            existingUser.displayName = displayName;
+                        }
+
+                        if (profilePicUrl && !profilePicUrl.includes('placehold.co') && existingUser.profilePicUrl.includes('placehold.co')) {
+                            existingUser.profilePicUrl = profilePicUrl;
+                        }
+                    } else {
+                        usersMap.set(lowerCaseUsername, {
+                            username: username,
+                            displayName: displayName,
+                            profilePicUrl: profilePicUrl
+                        });
+                    }
+                }
+            });
+
+            // Strategy 2: Look for common list item containers (e.g., in modals)
+            const listItems = doc.querySelectorAll(
+                'div[role="dialog"] div[role="button"], ' +
+                'div[role="dialog"] ul > li'
+            );
+
+            listItems.forEach(item => {
+                let username = '';
+                let displayName = '';
+                let profilePicUrl = '';
+
+                const link = item.querySelector('a[href^="/"], a[href*="instagram.com/"]');
+                if (link) {
+                    const href = link.getAttribute('href');
+                    const usernameMatch = href.match(/(?:instagram\.com\/|\/)([a-zA-Z0-9._-]+)(?:\/)?$/);
+                    if (usernameMatch && usernameMatch[1] && !['p', 'explore', 'direct', 'stories', 'reels', 'accounts', 'login', 'emails', 'challenge', 'legal', 'about', 'privacy', 'help', 'terms'].includes(usernameMatch[1].toLowerCase())) {
+                        username = usernameMatch[1];
+                    }
+                }
+
+                if (username) {
+                    displayName = getDisplayName(item, username);
+                    const img = item.querySelector('img');
+                    if (img && img.src) {
+                        profilePicUrl = img.src;
+                    }
+
+                    const lowerCaseUsername = username.toLowerCase();
+                    if (usersMap.has(lowerCaseUsername)) {
+                        const existingUser = usersMap.get(lowerCaseUsername);
+
+                        const existingDisplayNameIsUsername = existingUser.displayName.toLowerCase() === existingUser.username.toLowerCase();
+                        const newDisplayNameIsDistinct = displayName.toLowerCase() !== username.toLowerCase();
+
+                        if (newDisplayNameIsDistinct && existingDisplayNameIsUsername) {
+                            existingUser.displayName = displayName;
+                        } else if (newDisplayNameIsDistinct && displayName.length > existingUser.displayName.length) {
+                            existingUser.displayName = displayName;
+                        }
+
+                        if (profilePicUrl && !profilePicUrl.includes('placehold.co') && existingUser.profilePicUrl.includes('placehold.co')) {
+                            existingUser.profilePicUrl = profilePicUrl;
+                        }
+                    } else {
+                        usersMap.set(lowerCaseUsername, {
+                            username: username,
+                            displayName: displayName,
+                            profilePicUrl: profilePicUrl
+                        });
+                    }
+                }
+            });
+        }
+
+        /**
+         * Extracts follower names, usernames, and profile picture URLs from the uploaded HTML file(s).
+         */
+        async function extractFollowers() {
+            const fileInput1 = document.getElementById('htmlFile1');
+            const fileInput2 = document.getElementById('htmlFile2');
+            const outputDiv = document.getElementById('output');
+            const combineCopyButton = document.getElementById('combineCopyButton');
+
+            outputDiv.innerHTML = '<p class="empty-message">Processing...</p>';
+            outputDiv.classList.add('empty-message');
+            combineCopyButton.style.display = 'none';
+            document.getElementById('extractedCountDisplay').querySelector('span').textContent = '0';
+            document.getElementById('searchInput').value = ''; // Clear search on new extraction
+            autoExpandTextarea(document.getElementById('searchInput')); // Reset search input height
+
+            const file1 = fileInput1.files[0];
+            const file2 = fileInput2.files[0];
+
+            if (!file1) {
+                showMessageBox("Select primary HTML file.");
+                outputDiv.innerHTML = '<p class="empty-message">No file selected.</p>';
+                return;
+            }
+
+            const uniqueUsers = new Map(); // Stores {username: {username, displayName, profilePicUrl}}
+
+            try {
+                // Process Primary File
+                const htmlContent1 = await readFileAsText(file1);
+                processHtmlContent(htmlContent1, uniqueUsers);
+
+                // Process Optional Secondary File
+                if (file2) {
+                    const htmlContent2 = await readFileAsText(file2);
+                    processHtmlContent(htmlContent2, uniqueUsers, true); // Pass true for secondary file
+                }
+                
+                globalExtractedUsers = Array.from(uniqueUsers.values());
+                globalExtractedUsers.sort((a, b) => a.username.localeCompare(b.username)); // Sort alphabetically by username
+
+                renderExtractedUsers(globalExtractedUsers);
+
+            } catch (error) {
+                console.error("Error during file processing:", error);
+                showMessageBox("Error processing file. Ensure it's valid HTML.");
+                outputDiv.innerHTML = '<p class="empty-message">Error processing file.</p>';
+                combineCopyButton.style.display = 'none';
+            }
+        }
+
+        /**
+         * Renders the given array of user objects into the output div.
+         * @param {Array<Object>} users - An array of user objects to render.
+         */
+        function renderExtractedUsers(users) {
+            const outputDiv = document.getElementById('output');
+            const combineCopyButton = document.getElementById('combineCopyButton');
+            const extractedCountSpan = document.getElementById('extractedCountDisplay').querySelector('span');
+
+            outputDiv.innerHTML = ''; // Clear previous content
+            outputDiv.classList.remove('empty-message');
+
+            if (users.length > 0) {
+                users.forEach(user => {
+                    const userLink = document.createElement('a');
+                    userLink.href = `https://www.instagram.com/${user.username}/`;
+                    userLink.target = '_blank'; // Open in new tab
+                    userLink.classList.add('user-entry');
+                    userLink.dataset.username = user.username; // Store username for removal
+
+                    // Profile Picture
+                    const profilePic = document.createElement('img');
+                    profilePic.classList.add('profile-pic');
+                    profilePic.src = user.profilePicUrl || 'https://placehold.co/45x45/cccccc/333333?text=N/A'; // Placeholder if no URL found
+                    profilePic.alt = `${user.username}'s profile picture`;
+                    profilePic.onerror = function() {
+                        this.src = 'https://placehold.co/45x45/cccccc/333333?text=N/A'; // Fallback for broken images
+                    };
+
+                    const textContentDiv = document.createElement('div');
+                    textContentDiv.classList.add('text-content');
+
+                    const usernameSpan = document.createElement('span');
+                    usernameSpan.classList.add('username');
+                    usernameSpan.textContent = `@${user.username}`; // Display with @ prefix
+
+                    const displayNameSpan = document.createElement('span');
+                    displayNameSpan.classList.add('display-name');
+                    displayNameSpan.textContent = user.displayName; // Display the raw extracted name
+
+                    textContentDiv.appendChild(usernameSpan);
+                    textContentDiv.appendChild(displayNameSpan);
+
+                    userLink.appendChild(profilePic);
+                    userLink.appendChild(textContentDiv);
+                    outputDiv.appendChild(userLink);
+
+                    // Add swipe/drag to remove functionality
+                    addSwipeToRemove(userLink);
+                });
+                combineCopyButton.style.display = 'flex';
+            } else {
+                outputDiv.innerHTML = "<p class='empty-message'>No users extracted or all filtered. Ensure you've scrolled the Instagram list fully before saving the HTML.</p>";
+                outputDiv.classList.add('empty-message');
+                combineCopyButton.style.display = 'none';
+            }
+            extractedCountSpan.textContent = users.length; // Update the count display
+        }
+
+        // --- Swipe to Remove Logic ---
+        let startX = 0;
+        let isDragging = false;
+        let currentElement = null;
+        let usernameToRemoveOnTransitionEnd = null; // New variable to store username safely
+        const REMOVE_THRESHOLD = 100; // Pixels to drag to trigger remove
+
+        function addSwipeToRemove(element) {
+            element.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0 && e.pointerType === 'mouse') return; // Only left-click for mouse
+                isDragging = true;
+                startX = e.clientX;
+                currentElement = element;
+                currentElement.classList.add('dragging');
+                currentElement.style.transition = 'none'; // Disable transition during drag
+                element.setPointerCapture(e.pointerId); // Capture pointer for consistent drag
+            });
+
+            element.addEventListener('pointermove', (e) => {
+                if (!isDragging || currentElement !== element) return;
+                const deltaX = e.clientX - startX;
+                currentElement.style.transform = `translateX(${deltaX}px)`;
+            });
+
+            element.addEventListener('pointerup', (e) => {
+                if (!isDragging || currentElement !== element) return;
+                isDragging = false;
+                currentElement.classList.remove('dragging');
+                currentElement.releasePointerCapture(e.pointerId);
+
+                const deltaX = e.clientX - startX;
+
+                if (Math.abs(deltaX) > REMOVE_THRESHOLD) {
+                    // Store username safely before element might be detached/nulled
+                    usernameToRemoveOnTransitionEnd = currentElement.dataset.username;
+
+                    // Animate removal
+                    const direction = deltaX > 0 ? '100vw' : '-100vw';
+                    currentElement.classList.add('removing');
+                    currentElement.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+                    currentElement.style.transform = `translateX(${direction})`;
+                    currentElement.style.opacity = '0';
+
+                    currentElement.addEventListener('transitionend', function handler() {
+                        // Use the safely stored username
+                        if (usernameToRemoveOnTransitionEnd) {
+                            globalExtractedUsers = globalExtractedUsers.filter(user => user.username !== usernameToRemoveOnTransitionEnd);
+                            renderExtractedUsers(globalExtractedUsers);
+                        }
+                        // Clean up
+                        this.removeEventListener('transitionend', handler); // Remove listener after it fires
+                        usernameToRemoveOnTransitionEnd = null; // Clear the stored username
+                    }, { once: true }); // Ensure listener runs only once
+                } else {
+                    // Snap back
+                    currentElement.style.transition = 'transform 0.2s ease-out';
+                    currentElement.style.transform = 'translateX(0)';
+                }
+                currentElement = null; // Reset current element
+            });
+
+            // Handle cases where pointer leaves or is cancelled without a proper up
+            element.addEventListener('pointercancel', (e) => {
+                if (isDragging && currentElement === element) {
+                    isDragging = false;
+                    currentElement.classList.remove('dragging');
+                    currentElement.style.transition = 'transform 0.2s ease-out';
+                    currentElement.style.transform = 'translateX(0)';
+                    currentElement = null;
+                    usernameToRemoveOnTransitionEnd = null; // Clear if cancelled
+                }
+            });
+        }
+
+
+        // --- Copy Functions ---
+
+        /**
+         * Combines the extracted list into a text string, copies it to clipboard,
+         * and prompts the user to download it as a .txt file.
+         */
+        function combineAndCopy() {
+            const outputDiv = document.getElementById('output');
+            const userEntries = outputDiv.querySelectorAll('.user-entry');
+            let textToCopy = '';
+
+            if (userEntries.length === 0) {
+                showMessageBox("Nothing to copy. Extract list first.");
+                return;
+            }
+
+            userEntries.forEach(entry => {
+                const username = entry.querySelector('.username')?.textContent;
+                const displayName = entry.querySelector('.display-name')?.textContent;
+                const profilePicUrl = entry.querySelector('.profile-pic')?.src;
+
+                if (username && displayName) {
+                    let line = `${username.replace('@', '')} (Name: ${displayName})`;
+                    if (profilePicUrl && !profilePicUrl.includes('placehold.co')) {
+                        line += ` | Pic: ${profilePicUrl}`;
+                    }
+                    textToCopy += `${line}\n`;
+                }
+            });
+
+            if (!textToCopy) {
+                showMessageBox("No data to copy!");
+                return;
+            }
+
+            // 1. Copy to clipboard
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy.trim();
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                showMessageBox("List copied!");
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showMessageBox("Failed to copy. Copy manually.");
+            }
+            document.body.removeChild(tempTextArea);
+
+            // 2. Offer to download as .txt file
+            const blob = new Blob([textToCopy], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'instagram_followers.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        /**
+         * Copies the terms from the "Not Found Terms" modal to the clipboard.
+         */
+        function copyNotFoundTerms() {
+            const notFoundTermsOutput = document.getElementById('notFoundTermsOutput');
+            const textToCopy = notFoundTermsOutput.value.trim();
+
+            if (!textToCopy) {
+                showMessageBox("No terms to copy!");
+                return;
+            }
+
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = textToCopy;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            try {
+                document.execCommand('copy');
+                showMessageBox("Not found terms copied!");
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showMessageBox("Failed to copy. Copy manually.");
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        // --- Filter Logic ---
+
+        /**
+         * Updates the display for the number of filter terms entered or imported.
+         */
+        async function updateFilterTermCount() {
+            const filterInput = document.getElementById('filterInput').value.trim();
+            const filterFile = document.getElementById('filterFile').files[0];
+            
+            const tempFilterTerms = new Set();
+
+            if (filterInput) {
+                filterInput.split('\n').forEach(line => {
+                    const term = line.trim();
+                    if (term) {
+                        tempFilterTerms.add(term.toLowerCase().replace('@', ''));
+                    }
+                });
+            }
+
+            if (filterFile) {
+                try {
+                    const fileContent = await readFileAsText(filterFile);
+                    fileContent.split('\n').forEach(line => {
+                        const term = line.trim();
+                        if (term) {
+                            tempFilterTerms.add(term.toLowerCase().replace('@', ''));
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error reading filter file for count:", error);
+                }
+            }
+            document.getElementById('filterTermCount').textContent = tempFilterTerms.size;
+        }
+
+        /**
+         * Applies the filter based on user input (text or file) and re-renders the list.
+         */
+        async function applyFilter() {
+            const filterInput = document.getElementById('filterInput').value.trim();
+            const filterFile = document.getElementById('filterFile').files[0];
+            
+            let filterTerms = new Set();
+            let matchedTermsCount = 0;
+            globalNotFoundTerms = [];
+
+            if (filterInput) {
+                filterInput.split('\n').forEach(line => {
+                    const term = line.trim();
+                    if (term) {
+                        filterTerms.add(term.toLowerCase().replace('@', ''));
+                    }
+                });
+            }
+
+            if (filterFile) {
+                try {
+                    const fileContent = await readFileAsText(filterFile);
+                    fileContent.split('\n').forEach(line => {
+                        const term = line.trim();
+                        if (term) {
+                            filterTerms.add(term.toLowerCase().replace('@', ''));
+                        }
+                    });
+                } catch (error) {
+                    console.error("Error reading filter file:", error);
+                    showMessageBox("Error reading filter file. Ensure it's valid text.");
+                    return;
+                }
+            }
+
+            if (filterTerms.size === 0) {
+                showMessageBox("No filter terms. Enter text or upload file.");
+                return;
+            }
+
+            const currentNamesAndUsernames = new Set();
+            globalExtractedUsers.forEach(user => {
+                currentNamesAndUsernames.add(user.username.toLowerCase());
+                currentNamesAndUsernames.add(user.displayName.toLowerCase());
+            });
+
+            filterTerms.forEach(term => {
+                let foundMatchForTerm = false;
+                for (const nameOrUsername of currentNamesAndUsernames) {
+                    if (nameOrUsername.includes(term)) {
+                        foundMatchForTerm = true;
+                        break;
+                    }
+                }
+                
+                if (foundMatchForTerm) {
+                    matchedTermsCount++;
+                } else {
+                    globalNotFoundTerms.push(term);
+                }
+            });
+
+            const initialUserCount = globalExtractedUsers.length;
+
+            const filteredUsers = globalExtractedUsers.filter(user => {
+                const usernameLower = user.username.toLowerCase();
+                const displayNameLower = user.displayName.toLowerCase();
+
+                for (const term of filterTerms) {
+                    if (usernameLower.includes(term) || displayNameLower.includes(term)) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+
+            renderExtractedUsers(filteredUsers);
+            hideFilterModal();
+
+            const usersRemoved = initialUserCount - filteredUsers.length;
+            let message = `Filter applied! ${usersRemoved} removed.`;
+            message += `\n${matchedTermsCount} terms matched.`;
+            message += `\n${globalNotFoundTerms.length} terms not found.`;
+            showMessageBox(message);
+
+            if (globalNotFoundTerms.length > 0) {
+                showNotFoundModal(globalNotFoundTerms);
+            }
+        }
+
+        // --- Search Logic ---
+
+        /**
+         * Performs a search on the extracted users and re-renders the list with matches at the top.
+         */
+        function performSearch() {
+            const searchInput = document.getElementById('searchInput').value.trim();
+            if (!searchInput) {
+                renderExtractedUsers(globalExtractedUsers);
+                return;
+            }
+
+            const searchTerms = searchInput.split('\n')
+                                            .map(term => term.trim().toLowerCase().replace('@', ''))
+                                            .filter(term => term !== '');
+
+            if (searchTerms.length === 0) {
+                renderExtractedUsers(globalExtractedUsers);
+                return;
+            }
+
+            const matchedUsers = [];
+            const otherUsers = [];
+            const matchedUsernames = new Set();
+
+            globalExtractedUsers.forEach(user => {
+                const usernameLower = user.username.toLowerCase();
+                const displayNameLower = user.displayName.toLowerCase();
+                let isMatched = false;
+
+                for (const term of searchTerms) {
+                    if (usernameLower.includes(term) || displayNameLower.includes(term)) {
+                        if (!matchedUsernames.has(usernameLower)) {
+                            matchedUsers.push(user);
+                            matchedUsernames.add(usernameLower);
+                        }
+                        isMatched = true;
+                        break;
+                    }
+                }
+
+                if (!isMatched && !matchedUsernames.has(usernameLower)) {
+                    otherUsers.push(user);
+                }
+            });
+
+            matchedUsers.sort((a, b) => a.username.localeCompare(b.username));
+            otherUsers.sort((a, b) => a.username.localeCompare(b.username));
+
+            const combinedList = matchedUsers.concat(otherUsers);
+            renderExtractedUsers(combinedList);
+        }
+
+        // --- Event Listeners ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme on load
+            applySavedTheme();
+
+            // Dark mode toggle listener
+            darkModeToggle.addEventListener('change', toggleTheme);
+
+            // File input change listeners
+            document.getElementById('htmlFile1').addEventListener('change', () => updateFileNameDisplay('htmlFile1', 'file1Name'));
+            document.getElementById('htmlFile2').addEventListener('change', () => updateFileNameDisplay('htmlFile2', 'file2Name'));
+            document.getElementById('filterFile').addEventListener('change', () => {
+                updateFileNameDisplay('filterFile', 'filterFileName');
+                updateFilterTermCount(); // Also update filter count when file changes
+            });
+
+            // Filter input textarea for live count update
+            document.getElementById('filterInput').addEventListener('input', updateFilterTermCount);
+
+            // Search input for live search
+            document.getElementById('searchInput').addEventListener('input', performSearch);
+        });
+    </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ Service Worker Registered'));
+    }
+  </script>
+</body>
+</html>
